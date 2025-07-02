@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Upload, X, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,8 @@ const FilesStep: React.FC<FilesStepProps> = ({ formData, updateFormData }) => {
         problems: [{
           id: Date.now().toString(),
           text: '',
-          images: []
+          images: [],
+          audios: []
         }]
       });
     }
@@ -47,36 +47,6 @@ const FilesStep: React.FC<FilesStepProps> = ({ formData, updateFormData }) => {
 
   const totalSize = formData.files.reduce((sum, file) => sum + file.size, 0);
 
-  const handleGlobalPaste = (event: ClipboardEvent) => {
-    const items = event.clipboardData?.items;
-    if (!items) return;
-
-    const files: File[] = [];
-    
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      if (item.kind === 'file') {
-        const file = item.getAsFile();
-        if (file) {
-          files.push(file);
-        }
-      }
-    }
-
-    if (files.length > 0) {
-      const newFiles = [...formData.files, ...files].slice(0, 10);
-      updateFormData({ files: newFiles });
-      event.preventDefault();
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('paste', handleGlobalPaste);
-    return () => {
-      document.removeEventListener('paste', handleGlobalPaste);
-    };
-  }, [formData.files]);
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -84,7 +54,7 @@ const FilesStep: React.FC<FilesStepProps> = ({ formData, updateFormData }) => {
           Descreva seus Problemas
         </h2>
         <p className="text-white/70">
-          Descreva cada problema com texto, imagens e áudio explicativo
+          Descreva cada problema com texto, imagens e áudios explicativos
         </p>
       </div>
 
@@ -103,7 +73,7 @@ const FilesStep: React.FC<FilesStepProps> = ({ formData, updateFormData }) => {
         >
           <Upload className="w-10 h-10 text-white/60 mx-auto mb-3" />
           <p className="text-white/80 mb-2">
-            Clique para selecionar arquivos ou use Ctrl+V para colar
+            Clique para selecionar arquivos adicionais
           </p>
           <p className="text-white/60 text-sm">
             Máximo 10 arquivos, até 100MB total

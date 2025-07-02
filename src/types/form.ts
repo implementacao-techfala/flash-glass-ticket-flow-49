@@ -3,7 +3,7 @@ export interface ProblemItem {
   id: string;
   text: string;
   images: File[];
-  audio?: File;
+  audios: { file: File; transcription?: string }[];
 }
 
 export interface SupportFormData {
