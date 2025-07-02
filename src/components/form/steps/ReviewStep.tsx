@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Check, Edit, File, Clock, AlertCircle, Zap, Flame, HelpCircle, AlertTriangle, Lightbulb } from 'lucide-react';
+import { Check, Edit, File, Clock, AlertCircle, Zap, Flame, HelpCircle, AlertTriangle, Lightbulb, Image, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SupportFormData } from '@/types/form';
 
@@ -93,12 +92,13 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
         <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="text-white font-medium mb-2">Detalhes</h3>
+              <h3 className="text-white font-medium mb-2">Informações Básicas</h3>
               <div className="space-y-2 text-sm">
                 <p className="text-white/70"><span className="text-white/90">Nome:</span> {formData.name}</p>
-                <p className="text-white/70"><span className="text-white/90">Email/Empresa:</span> {formData.email}</p>
                 <p className="text-white/70"><span className="text-white/90">Título:</span> {formData.title}</p>
-                <p className="text-white/70"><span className="text-white/90">Descrição:</span> {formData.description.substring(0, 100)}...</p>
+                {formData.description && (
+                  <p className="text-white/70"><span className="text-white/90">Descrição:</span> {formData.description.substring(0, 100)}{formData.description.length > 100 ? '...' : ''}</p>
+                )}
               </div>
             </div>
             <Button
@@ -112,16 +112,33 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
           </div>
         </div>
 
-        {/* Arquivos */}
+        {/* Problemas */}
         <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <File className="w-5 h-5 text-green-400" />
-              <div>
-                <h3 className="text-white font-medium">Arquivos</h3>
-                <p className="text-white/70 text-sm">
-                  {formData.files.length} arquivo(s) - {formatFileSize(formData.files.reduce((sum, file) => sum + file.size, 0))}
-                </p>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="text-white font-medium mb-3">Problemas Descritos</h3>
+              <div className="space-y-3">
+                {formData.problems.map((problem, index) => (
+                  <div key={problem.id} className="p-3 bg-white/5 rounded border border-white/10">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="text-white/90 font-medium text-sm">Problema #{index + 1}</span>
+                      <div className="flex items-center space-x-1">
+                        {problem.images.length > 0 && (
+                          <div className="flex items-center space-x-1">
+                            <Image className="w-3 h-3 text-green-400" />
+                            <span className="text-green-400 text-xs">{problem.images.length}</span>
+                          </div>
+                        )}
+                        {problem.audio && (
+                          <Mic className="w-3 h-3 text-blue-400" />
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-white/70 text-xs">
+                      {problem.text.substring(0, 150)}{problem.text.length > 150 ? '...' : ''}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
             <Button
@@ -134,6 +151,31 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
             </Button>
           </div>
         </div>
+
+        {/* Arquivos Adicionais */}
+        {formData.files.length > 0 && (
+          <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <File className="w-5 h-5 text-green-400" />
+                <div>
+                  <h3 className="text-white font-medium">Arquivos Adicionais</h3>
+                  <p className="text-white/70 text-sm">
+                    {formData.files.length} arquivo(s) - {formatFileSize(formData.files.reduce((sum, file) => sum + file.size, 0))}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(3)}
+                className="text-white/60 hover:text-white"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Prioridade */}
         <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">

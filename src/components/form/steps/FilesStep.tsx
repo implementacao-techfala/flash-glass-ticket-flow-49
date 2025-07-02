@@ -1,8 +1,9 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Upload, X, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SupportFormData } from '@/types/form';
+import ProblemManager from '../ProblemManager';
 
 interface FilesStepProps {
   formData: SupportFormData;
@@ -11,6 +12,19 @@ interface FilesStepProps {
 
 const FilesStep: React.FC<FilesStepProps> = ({ formData, updateFormData }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Inicializar com um problema vazio se não houver nenhum
+  useEffect(() => {
+    if (formData.problems.length === 0) {
+      updateFormData({
+        problems: [{
+          id: Date.now().toString(),
+          text: '',
+          images: []
+        }]
+      });
+    }
+  }, []);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
@@ -33,81 +47,121 @@ const FilesStep: React.FC<FilesStepProps> = ({ formData, updateFormData }) => {
 
   const totalSize = formData.files.reduce((sum, file) => sum + file.size, 0);
 
+  const handleGlobalPaste = (event: ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    const files: File[] = [];
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) {
+          files.push(file);
+        }
+      }
+    }
+
+    if (files.length > 0) {
+      const newFiles = [...formData.files, ...files].slice(0, 10);
+      updateFormData({ files: newFiles });
+      event.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('paste', handleGlobalPaste);
+    return () => {
+      document.removeEventListener('paste', handleGlobalPaste);
+    };
+  }, [formData.files]);
+
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2">
-          Anexar Arquivos
+          Descreva seus Problemas
         </h2>
         <p className="text-white/70">
-          Anexe screenshots, logs ou outros arquivos que possam ajudar (opcional)
+          Descreva cada problema com texto, imagens e áudio explicativo
         </p>
       </div>
 
-      <div 
-        className="border-2 border-dashed border-white/30 rounded-xl p-8 text-center bg-white/5 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <Upload className="w-12 h-12 text-white/60 mx-auto mb-4" />
-        <p className="text-white/80 mb-2">
-          Clique para selecionar arquivos ou arraste aqui
-        </p>
-        <p className="text-white/60 text-sm">
-          Máximo 10 arquivos, até 100MB total
-        </p>
+      {/* Gerenciador de problemas */}
+      <ProblemManager
+        problems={formData.problems}
+        onProblemsChange={(problems) => updateFormData({ problems })}
+      />
+
+      <div className="border-t border-white/20 pt-6">
+        <h3 className="text-white/90 font-medium mb-4">Arquivos Adicionais (Opcional)</h3>
         
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          accept="image/*,.pdf,.doc,.docx,.txt,.zip"
-          onChange={handleFileSelect}
-        />
-      </div>
-
-      {formData.files.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="text-white/90 font-medium">
-              Arquivos Selecionados ({formData.files.length}/10)
-            </h3>
-            <span className="text-white/60 text-sm">
-              Total: {formatFileSize(totalSize)}
-            </span>
-          </div>
+        <div 
+          className="border-2 border-dashed border-white/30 rounded-xl p-6 text-center bg-white/5 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="w-10 h-10 text-white/60 mx-auto mb-3" />
+          <p className="text-white/80 mb-2">
+            Clique para selecionar arquivos ou use Ctrl+V para colar
+          </p>
+          <p className="text-white/60 text-sm">
+            Máximo 10 arquivos, até 100MB total
+          </p>
           
-          <div className="space-y-2">
-            {formData.files.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur-md"
-              >
-                <div className="flex items-center space-x-3">
-                  <File className="w-5 h-5 text-white/60" />
-                  <div>
-                    <p className="text-white/90 text-sm font-medium">
-                      {file.name}
-                    </p>
-                    <p className="text-white/60 text-xs">
-                      {formatFileSize(file.size)}
-                    </p>
-                  </div>
-                </div>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFile(index)}
-                  className="text-white/60 hover:text-white hover:bg-red-500/20"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            accept="*/*"
+            onChange={handleFileSelect}
+          />
         </div>
-      )}
+
+        {formData.files.length > 0 && (
+          <div className="mt-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <h4 className="text-white/90 font-medium">
+                Arquivos Adicionais ({formData.files.length}/10)
+              </h4>
+              <span className="text-white/60 text-sm">
+                Total: {formatFileSize(totalSize)}
+              </span>
+            </div>
+            
+            <div className="space-y-2">
+              {formData.files.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur-md"
+                >
+                  <div className="flex items-center space-x-3">
+                    <File className="w-5 h-5 text-white/60" />
+                    <div>
+                      <p className="text-white/90 text-sm font-medium">
+                        {file.name}
+                      </p>
+                      <p className="text-white/60 text-xs">
+                        {formatFileSize(file.size)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(index)}
+                    className="text-white/60 hover:text-white hover:bg-red-500/20"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

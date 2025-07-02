@@ -15,13 +15,10 @@ const DetailsStep: React.FC<DetailsStepProps> = ({ formData, updateFormData }) =
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-white mb-2">
-          Descreva seu desafio em detalhes
+          Informações Básicas
         </h2>
         <p className="text-white/70 text-sm">
-          (Pode listar mais de um desafio, se quiser economizar tempo.)
-        </p>
-        <p className="text-white/70 text-sm mt-2">
-          Quanto mais descrever, mais claro vai ficar *
+          Informe seus dados e um resumo geral do que precisa
         </p>
       </div>
 
@@ -42,23 +39,8 @@ const DetailsStep: React.FC<DetailsStepProps> = ({ formData, updateFormData }) =
         </div>
 
         <div>
-          <Label htmlFor="email" className="text-white/90 mb-2 block">
-            Nome da empresa ou e-mail da conta *
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => updateFormData({ email: e.target.value })}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-md"
-            placeholder="seu@email.com ou Nome da Empresa"
-            required
-          />
-        </div>
-
-        <div>
           <Label htmlFor="title" className="text-white/90 mb-2 block">
-            Título do Problema *
+            Título Geral do Chamado *
           </Label>
           <Input
             id="title"
@@ -66,22 +48,21 @@ const DetailsStep: React.FC<DetailsStepProps> = ({ formData, updateFormData }) =
             value={formData.title}
             onChange={(e) => updateFormData({ title: e.target.value })}
             className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-md"
-            placeholder="Resuma seu problema em poucas palavras"
+            placeholder="Resumo geral dos problemas que você está enfrentando"
             required
           />
         </div>
 
         <div>
           <Label htmlFor="description" className="text-white/90 mb-2 block">
-            Descrição Detalhada *
+            Descrição Geral (Opcional)
           </Label>
           <Textarea
             id="description"
             value={formData.description}
             onChange={(e) => updateFormData({ description: e.target.value })}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-md min-h-[120px] resize-none"
-            placeholder="Descreva detalhadamente seu problema, incluindo quando ocorreu, o que você estava fazendo, e qualquer mensagem de erro que tenha visto..."
-            required
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-md min-h-[100px] resize-none"
+            placeholder="Contexto geral sobre os problemas que você vai descrever..."
           />
         </div>
       </div>

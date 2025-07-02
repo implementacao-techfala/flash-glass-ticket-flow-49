@@ -20,6 +20,7 @@ const SupportForm: React.FC = () => {
     type: '',
     title: '',
     description: '',
+    problems: [],
     files: [],
     priority: '',
     email: '',
@@ -32,7 +33,12 @@ const SupportForm: React.FC = () => {
   useEffect(() => {
     const savedData = loadSavedData();
     if (savedData) {
-      setFormData(savedData);
+      // Garantir compatibilidade com dados antigos
+      const migratedData = {
+        ...savedData,
+        problems: savedData.problems || []
+      };
+      setFormData(migratedData);
       toast({
         title: "Dados recuperados",
         description: "Seus dados foram restaurados automaticamente.",
@@ -47,8 +53,8 @@ const SupportForm: React.FC = () => {
   const canProceed = () => {
     switch (currentStep) {
       case 1: return formData.type !== '';
-      case 2: return formData.name && formData.email && formData.title && formData.description;
-      case 3: return true; // Files are optional
+      case 2: return formData.name && formData.title;
+      case 3: return formData.problems.some(p => p.text.trim() !== '');
       case 4: return formData.priority !== '';
       case 5: return true;
       default: return false;
@@ -82,14 +88,33 @@ const SupportForm: React.FC = () => {
       // Add form fields
       formDataToSend.append('type', formData.type);
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('email', formData.email);
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('priority', formData.priority);
       
-      // Add files
+      // Add problems data
+      formDataToSend.append('problems', JSON.stringify(formData.problems.map(p => ({
+        text: p.text,
+        imageCount: p.images.length,
+        hasAudio: !!p.audio
+      }))));
+      
+      // Add problem images and audio
+      let fileIndex = 0;
+      formData.problems.forEach((problem, problemIndex) => {
+        problem.images.forEach((image) => {
+          formDataToSend.append(`problem_${problemIndex}_image_${fileIndex}`, image);
+          fileIndex++;
+        });
+        
+        if (problem.audio) {
+          formDataToSend.append(`problem_${problemIndex}_audio`, problem.audio);
+        }
+      });
+      
+      // Add additional files
       formData.files.forEach((file, index) => {
-        formDataToSend.append(`file_${index}`, file);
+        formDataToSend.append(`additional_file_${index}`, file);
       });
 
       const response = await fetch('https://integradorwebhook.sanjaworks.com/webhook/formulario-de-tickets-suporte', {
@@ -108,6 +133,7 @@ const SupportForm: React.FC = () => {
           type: '',
           title: '',
           description: '',
+          problems: [],
           files: [],
           priority: '',
           email: '',
