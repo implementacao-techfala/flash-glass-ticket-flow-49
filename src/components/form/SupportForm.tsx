@@ -18,12 +18,10 @@ const SupportForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<SupportFormData>({
     type: '',
-    title: '',
-    description: '',
     problems: [],
-    files: [],
     priority: '',
     email: '',
+    phone: '',
     name: '',
   });
 
@@ -36,7 +34,9 @@ const SupportForm: React.FC = () => {
       // Garantir compatibilidade com dados antigos
       const migratedData = {
         ...savedData,
-        problems: savedData.problems || []
+        problems: savedData.problems || [],
+        phone: savedData.phone || '',
+        email: savedData.email || ''
       };
       setFormData(migratedData);
       toast({
@@ -53,7 +53,7 @@ const SupportForm: React.FC = () => {
   const canProceed = () => {
     switch (currentStep) {
       case 1: return formData.type !== '';
-      case 2: return formData.name && formData.title;
+      case 2: return formData.name !== '';
       case 3: return formData.problems.some(p => p.text.trim() !== '');
       case 4: return formData.priority !== '';
       case 5: return true;
@@ -88,9 +88,15 @@ const SupportForm: React.FC = () => {
       // Add form fields
       formDataToSend.append('type', formData.type);
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
       formDataToSend.append('priority', formData.priority);
+      
+      if (formData.email) {
+        formDataToSend.append('email', formData.email);
+      }
+      
+      if (formData.phone) {
+        formDataToSend.append('phone', formData.phone);
+      }
       
       // Add problems data
       formDataToSend.append('problems', JSON.stringify(formData.problems.map(p => ({
@@ -114,11 +120,6 @@ const SupportForm: React.FC = () => {
           }
         });
       });
-      
-      // Add additional files
-      formData.files.forEach((file, index) => {
-        formDataToSend.append(`additional_file_${index}`, file);
-      });
 
       const response = await fetch('https://integradorwebhook.sanjaworks.com/webhook/formulario-de-tickets-suporte', {
         method: 'POST',
@@ -134,12 +135,10 @@ const SupportForm: React.FC = () => {
         // Reset form
         setFormData({
           type: '',
-          title: '',
-          description: '',
           problems: [],
-          files: [],
           priority: '',
           email: '',
+          phone: '',
           name: '',
         });
         setCurrentStep(1);

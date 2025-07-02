@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Check, Edit, File, Clock, AlertCircle, Zap, Flame, HelpCircle, AlertTriangle, Lightbulb, Image, Mic } from 'lucide-react';
+import { Check, Edit, Clock, AlertCircle, Zap, Flame, HelpCircle, AlertTriangle, Lightbulb, Image, Mic, Phone, Mail, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SupportFormData } from '@/types/form';
 
@@ -47,14 +48,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -88,16 +81,27 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
           </div>
         </div>
 
-        {/* Detalhes */}
+        {/* Informações de Contato */}
         <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="text-white font-medium mb-2">Informações Básicas</h3>
+              <h3 className="text-white font-medium mb-2">Informações de Contato</h3>
               <div className="space-y-2 text-sm">
-                <p className="text-white/70"><span className="text-white/90">Nome:</span> {formData.name}</p>
-                <p className="text-white/70"><span className="text-white/90">Título:</span> {formData.title}</p>
-                {formData.description && (
-                  <p className="text-white/70"><span className="text-white/90">Descrição:</span> {formData.description.substring(0, 100)}{formData.description.length > 100 ? '...' : ''}</p>
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-white/60" />
+                  <p className="text-white/70">{formData.name}</p>
+                </div>
+                {formData.email && (
+                  <div className="flex items-center space-x-2">
+                    <Mail className="w-4 h-4 text-white/60" />
+                    <p className="text-white/70">{formData.email}</p>
+                  </div>
+                )}
+                {formData.phone && (
+                  <div className="flex items-center space-x-2">
+                    <Phone className="w-4 h-4 text-white/60" />
+                    <p className="text-white/70">{formData.phone}</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -154,31 +158,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
             </Button>
           </div>
         </div>
-
-        {/* Arquivos Adicionais */}
-        {formData.files.length > 0 && (
-          <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <File className="w-5 h-5 text-green-400" />
-                <div>
-                  <h3 className="text-white font-medium">Arquivos Adicionais</h3>
-                  <p className="text-white/70 text-sm">
-                    {formData.files.length} arquivo(s) - {formatFileSize(formData.files.reduce((sum, file) => sum + file.size, 0))}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(3)}
-                className="text-white/60 hover:text-white"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        )}
 
         {/* Prioridade */}
         <div className="p-4 bg-white/10 rounded-lg backdrop-blur-md">
