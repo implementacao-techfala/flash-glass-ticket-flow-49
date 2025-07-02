@@ -96,10 +96,10 @@ const SupportForm: React.FC = () => {
       formDataToSend.append('problems', JSON.stringify(formData.problems.map(p => ({
         text: p.text,
         imageCount: p.images.length,
-        hasAudio: !!p.audio
+        audioCount: p.audios.length
       }))));
       
-      // Add problem images and audio
+      // Add problem images and audios
       let fileIndex = 0;
       formData.problems.forEach((problem, problemIndex) => {
         problem.images.forEach((image) => {
@@ -107,9 +107,12 @@ const SupportForm: React.FC = () => {
           fileIndex++;
         });
         
-        if (problem.audio) {
-          formDataToSend.append(`problem_${problemIndex}_audio`, problem.audio);
-        }
+        problem.audios.forEach((audioItem, audioIndex) => {
+          formDataToSend.append(`problem_${problemIndex}_audio_${audioIndex}`, audioItem.file);
+          if (audioItem.transcription) {
+            formDataToSend.append(`problem_${problemIndex}_audio_${audioIndex}_transcription`, audioItem.transcription);
+          }
+        });
       });
       
       // Add additional files

@@ -129,8 +129,11 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, onEdit }) => {
                             <span className="text-green-400 text-xs">{problem.images.length}</span>
                           </div>
                         )}
-                        {problem.audio && (
-                          <Mic className="w-3 h-3 text-blue-400" />
+                        {problem.audios.length > 0 && (
+                          <div className="flex items-center space-x-1">
+                            <Mic className="w-3 h-3 text-blue-400" />
+                            <span className="text-blue-400 text-xs">{problem.audios.length}</span>
+                          </div>
                         )}
                       </div>
                     </div>

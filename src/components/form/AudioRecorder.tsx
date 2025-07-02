@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Play, Pause, Square, Trash2, Plus, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -138,27 +139,6 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
       onAudioRecorded(finalAudios);
     } finally {
       setIsTranscribing(null);
-    }
-  };
-
-  const playAudio = () => {
-    if (audioRef.current && existingAudio) {
-      const audioUrl = URL.createObjectURL(existingAudio);
-      audioRef.current.src = audioUrl;
-      audioRef.current.play();
-      setIsPlaying(true);
-      
-      audioRef.current.onended = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
-      };
-    }
-  };
-
-  const pauseAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
     }
   };
 
@@ -305,28 +285,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           </div>
           
           <Button
-            onClick={isRecording ? () => {
-              if (recorderRef.current && streamRef.current) {
-                recorderRef.current.stopRecording(() => {
-                  const blob = recorderRef.current.getBlob();
-                  const audioFile = new File([blob], `audio-${Date.now()}.wav`, { 
-                    type: 'audio/wav' 
-                  });
-                  
-                  handleNewRecording(audioFile);
-                  
-                  // Cleanup
-                  streamRef.current?.getTracks().forEach(track => track.stop());
-                  streamRef.current = null;
-                  recorderRef.current = null;
-                });
-
-                setIsRecording(false);
-                if (timerRef.current) {
-                  clearInterval(timerRef.current);
-                }
-              }
-            } : startRecording}
+            onClick={isRecording ? stopRecording : startRecording}
             className={isRecording 
               ? "bg-red-500 hover:bg-red-600" 
               : existingAudios.length > 0 
@@ -345,21 +304,6 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           </Button>
         </div>
       </div>
-
-      {hasPermission === false && (
-        <div className="p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-          <p className="text-red-200 text-sm text-center">
-            Permissão de microfone negada. Por favor, permita o acesso ao microfone para gravar áudio.
-          </p>
-          <Button
-            onClick={checkPermission}
-            className="w-full mt-2 bg-red-500/30 hover:bg-red-500/50 text-red-200"
-            size="sm"
-          >
-            Tentar Novamente
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
