@@ -1,8 +1,17 @@
 
-import React from 'react';
-import { Play, Monitor, Book, Lightbulb } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Monitor, Book, Lightbulb, X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 const VideoSection: React.FC = () => {
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
   const videos = [
     {
       id: 'tour',
@@ -27,6 +36,12 @@ const VideoSection: React.FC = () => {
     }
   ];
 
+  const openVideoModal = (embedId: string) => {
+    setSelectedVideo(embedId);
+  };
+
+  const selectedVideoData = selectedVideo ? videos.find(v => v.embedId === selectedVideo) : null;
+
   return (
     <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10">
       <div className="text-center mb-6">
@@ -49,14 +64,22 @@ const VideoSection: React.FC = () => {
                 <h4 className="text-white font-medium text-sm">{video.title}</h4>
               </div>
               
-              <div className="aspect-video bg-black/20 rounded-lg relative overflow-hidden">
+              <div 
+                className="aspect-video bg-black/20 rounded-lg relative overflow-hidden cursor-pointer hover:bg-black/30 transition-colors group"
+                onClick={() => openVideoModal(video.embedId)}
+              >
                 <iframe
                   src={`https://www.youtube.com/embed/${video.embedId}`}
                   title={video.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full"
+                  className="w-full h-full pointer-events-none"
                 />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+                    <Play className="w-6 h-6 text-white" />
+                  </div>
+                </div>
               </div>
               
               <p className="text-white/60 text-xs">{video.description}</p>
@@ -64,6 +87,30 @@ const VideoSection: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Modal para vídeo em tela cheia */}
+      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+        <DialogContent className="max-w-5xl w-[90vw] h-[80vh] p-0 bg-black/90 border-white/20">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="text-white text-xl">
+              {selectedVideoData?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 p-4 pt-2">
+            {selectedVideo && (
+              <div className="w-full h-full">
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`}
+                  title={selectedVideoData?.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full rounded-lg"
+                />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
         <div className="text-center space-y-2">
